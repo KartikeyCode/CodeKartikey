@@ -6,13 +6,16 @@ export class Game extends Scene
     camera: Phaser.Cameras.Scene2D.Camera;
     background: Phaser.GameObjects.Image;
     gameText: Phaser.GameObjects.Text;
-
+    private racc!:Phaser.Physics.Arcade.Sprite
+    cursors:Phaser.Types.Input.Keyboard.CursorKeys | undefined
     constructor ()
     {
         super('Game');
+        
     }
 
     preload(){
+        // tilemap images
         this.load.image("tilesPlant","assets/TX_Plant.png")
         this.load.image("tilesPlayer","assets/TX_Player.png")
         this.load.image("tilesProps","assets/TX_Props.png")
@@ -22,11 +25,16 @@ export class Game extends Scene
         this.load.image("tilesWall","assets/TX_Tileset_Wall.png")
         this.load.tilemapTiledJSON('map','assets/tilemap1.json')
 
+        //player sprite
+        this.load.atlas('racc','assets/texture.png','assets/texture.json')
+
+       
+
     }
 
     create ()
     {
-
+        //tilemap generation
         const map = this.make.tilemap({key:'map'})
         const plant_tileset = map.addTilesetImage('TX_Plant','tilesPlant')
         const player_tileset = map.addTilesetImage('TX_Player','tilesPlayer')
@@ -42,12 +50,111 @@ export class Game extends Scene
         const buildings = map.createLayer('buildings',tilesetarr);
         const roofs = map.createLayer('Roofs',tilesetarr);
         
-
+        //adding player
+        this.racc = this.physics.add.sprite(100,700,'racc','idledown');
+        this.racc.setScale(0.25)
+        this.createPlayerAnimations(this.racc) //Add animations to player
+        this.racc.setCollideWorldBounds(true) //don't fall off the map lol
         EventBus.emit('current-scene-ready', this);
     }
 
-    changeScene ()
-    {
-        this.scene.start('GameOver');
+    //player animations method
+    private createPlayerAnimations(player: Phaser.Physics.Arcade.Sprite){
+        player.anims.create({
+            key:'walkdown',
+            frames: player.anims.generateFrameNames('racc',{
+                start:1,
+                end:8,
+                prefix:'walkdown',
+                suffix:'.gif'
+            }),
+            frameRate:10,
+            repeat:-1
+        })
+        player.anims.create({
+            key:'walkup',
+            frames: player.anims.generateFrameNames('racc',{
+                start:1,
+                end:8,
+                prefix:'walkup',
+                suffix:'.gif'
+            }),
+            frameRate:10,
+            repeat:-1
+        })
+        player.anims.create({
+            key:'walkleft',
+            frames: player.anims.generateFrameNames('racc',{
+                start:1,
+                end:8,
+                prefix:'walkleft',
+                suffix:'.gif'
+            }),
+            frameRate:10,
+            repeat:-1
+        })
+        player.anims.create({
+            key:'walkright',
+            frames: player.anims.generateFrameNames('racc',{
+                start:1,
+                end:8,
+                prefix:'walkright',
+                suffix:'.gif'
+            }),
+            frameRate:10,
+            repeat:-1
+        })
+        //idle:
+        player.anims.create({
+            key:'idleup',
+            frames: [{key:'racc',frame:'faceup'}]
+        })
+        player.anims.create({
+            key:'idledown',
+            frames: [{key:'racc',frame:'facedown'}]
+        })
+        player.anims.create({
+            key:'idleleft',
+            frames: [{key:'racc',frame:'faceleft'}]
+        })
+        player.anims.create({
+            key:'idleright',
+            frames: [{key:'racc',frame:'faceright'}]
+        })
+
+        // keyboard input
+         this.cursors = this.input.keyboard?.createCursorKeys()
+        
+
+
     }
+
+    update(time: number, delta: number): void {
+        if(!this.cursors || !this.racc){
+            return
+        }
+        const speed = 100
+        if(this.cursors.left?.isDown){
+            this.racc.anims.play('walkleft',true)
+            this.racc.setVelocity(-speed,0)
+        }
+        else if(this.cursors.right?.isDown){
+            this.racc.anims.play('walkright',true)
+            this.racc.setVelocity(speed,0)
+        }
+        else if(this.cursors.down?.isDown){
+            this.racc.anims.play('walkdown',true)
+            this.racc.setVelocity(0,speed)
+        }
+        else if(this.cursors.up?.isDown){
+            this.racc.anims.play('walkup',true)
+            this.racc.setVelocity(0,-speed)
+        }
+        else{
+            this.racc.anims.play('facedown')
+            this.racc.setVelocity(0,0)
+        }
+    }
+
+    
 }
