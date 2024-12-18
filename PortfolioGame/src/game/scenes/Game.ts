@@ -28,7 +28,7 @@ export class Game extends Scene
         //player sprite
         this.load.atlas('racc','assets/texture.png','assets/texture.json')
 
-       
+      
 
     }
 
@@ -51,10 +51,16 @@ export class Game extends Scene
         const roofs = map.createLayer('Roofs',tilesetarr);
         
         //adding player
-        this.racc = this.physics.add.sprite(100,700,'racc','idledown');
+        this.racc = this.physics.add.sprite(100,700,'racc','facedown');
         this.racc.setScale(0.25)
         this.createPlayerAnimations(this.racc) //Add animations to player
         this.racc.setCollideWorldBounds(true) //don't fall off the map lol
+
+        //camera follow player
+        this.cameras.main.setBounds(0,0,1024,768)
+        this.cameras.main.setZoom(1.5)
+        this.cameras.main.startFollow(this.racc)
+
         EventBus.emit('current-scene-ready', this);
     }
 
@@ -106,25 +112,26 @@ export class Game extends Scene
         })
         //idle:
         player.anims.create({
-            key:'idleup',
-            frames: [{key:'racc',frame:'faceup'}]
+            key:'faceup',
+            frames: [{key:'racc',frame:'faceup.gif'}]
         })
         player.anims.create({
-            key:'idledown',
-            frames: [{key:'racc',frame:'facedown'}]
+            key:'facedown',
+            frames: [{key:'racc',frame:'facedown.gif'}]
         })
         player.anims.create({
-            key:'idleleft',
-            frames: [{key:'racc',frame:'faceleft'}]
+            key:'faceleft',
+            frames: [{key:'racc',frame:'faceleft.gif'}]
         })
         player.anims.create({
-            key:'idleright',
-            frames: [{key:'racc',frame:'faceright'}]
+            key:'faceright',
+            frames: [{key:'racc',frame:'faceright.gif'}]
         })
 
         // keyboard input
          this.cursors = this.input.keyboard?.createCursorKeys()
         
+
 
 
     }
